@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/font/basicfont"
 )
 
 const (
@@ -30,12 +33,14 @@ var (
 )
 
 type Game struct {
-	Paddle1Y float32
-	Paddle2Y float32
-	BallX    float32
-	BallY    float32
-	BallDX   float32
-	BallDY   float32
+	Paddle1Y     float32
+	Paddle2Y     float32
+	BallX        float32
+	BallY        float32
+	BallDX       float32
+	BallDY       float32
+	Player1Score int
+	Player2Score int
 }
 
 func (g *Game) Update() error {
@@ -90,8 +95,15 @@ func (g *Game) handleCollisions() {
 		g.Paddle2Y = height - paddleHeight
 	}
 
-	// Ball Out of Window
-	if g.BallX < 0 || g.BallX > width {
+	// Ball exit from left
+	if g.BallX < 0 {
+		g.Player2Score++
+		g.resetBallPosition()
+	}
+
+	// Ball exit from right
+	if g.BallX > width {
+		g.Player1Score++
 		g.resetBallPosition()
 	}
 
@@ -123,6 +135,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// Draw the ball
 	vector.DrawFilledCircle(screen, g.BallX, g.BallY, ballSize, ballColor, true)
+
+	// Draw the scores
+	scoreText1 := fmt.Sprintf("Player 1: %d", g.Player1Score)
+	scoreText2 := fmt.Sprintf("Player 2: %d", g.Player2Score)
+	text.Draw(screen, scoreText1, basicfont.Face7x13, 20, 20, color.White)
+	text.Draw(screen, scoreText2, basicfont.Face7x13, 460, 20, color.White)
+
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -131,12 +150,14 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func main() {
 	game := &Game{
-		Paddle1Y: (height / 2) - (paddleHeight / 2),
-		Paddle2Y: (height / 2) - (paddleHeight / 2),
-		BallX:    width / 2,
-		BallY:    height / 2,
-		BallDX:   3,
-		BallDY:   3,
+		Paddle1Y:     (height / 2) - (paddleHeight / 2),
+		Paddle2Y:     (height / 2) - (paddleHeight / 2),
+		BallX:        width / 2,
+		BallY:        height / 2,
+		BallDX:       3,
+		BallDY:       3,
+		Player1Score: 0,
+		Player2Score: 0,
 	}
 	ebiten.SetWindowSize(width, height)
 	ebiten.SetWindowTitle("Pong")
