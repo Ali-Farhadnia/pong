@@ -8,17 +8,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-type Game struct {
-	Paddle1Y float32
-	Paddle2Y float32
-	BallX    float32
-	BallY    float32
-}
-
-func (g *Game) Update() error {
-	return nil
-}
-
 const (
 	// Define layout
 	width  = 640
@@ -38,8 +27,31 @@ var (
 	ballColor   = color.RGBA{255, 255, 255, 255}
 )
 
-func (g *Game) Draw(screen *ebiten.Image) {
+type Game struct {
+	Paddle1Y float32
+	Paddle2Y float32
+	BallX    float32
+	BallY    float32
+	BallDX   float32
+	BallDY   float32
+}
 
+func (g *Game) Update() error {
+	g.BallX += g.BallDX
+	g.BallY += g.BallDY
+
+	if g.BallX-ballSize <= 0 || g.BallX+ballSize >= width {
+		g.BallDX *= -1
+	}
+
+	if g.BallY-ballSize <= 0 || g.BallY+ballSize >= height {
+		g.BallDY *= -1
+	}
+
+	return nil
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw the left paddle
 	vector.DrawFilledRect(screen, paddleWidth, g.Paddle1Y, paddleWidth, paddleHeight, paddleColor, false)
 
@@ -60,6 +72,8 @@ func main() {
 		Paddle2Y: (height / 2) - (paddleHeight / 2),
 		BallX:    width / 2,
 		BallY:    height / 2,
+		BallDX:   2,
+		BallDY:   1,
 	}
 	ebiten.SetWindowSize(width, height)
 	ebiten.SetWindowTitle("Pong")
