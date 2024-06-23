@@ -15,17 +15,21 @@
             height: 100vh;
             background-color: black;
         }
+        canvas {
+            border: 1px solid white;
+        }
     </style>
-</head>
-<body>
+    <script src="wasm_exec.js"></script>
     <script>
-        // Initialize the Ebiten game
         const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("pong.wasm"), go.importObject).then(result => {
+        WebAssembly.instantiateStreaming(fetch("pong.wasm"), go.importObject).then((result) => {
             go.run(result.instance);
         }).catch(err => {
             console.error("Failed to load WebAssembly module:", err);
         });
     </script>
+</head>
+<body>
+    <canvas id="canvas" width="640" height="480"></canvas>
 </body>
 </html>
